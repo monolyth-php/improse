@@ -1,9 +1,8 @@
 <?php
 
-namespace Improse\Json;
-use Improse;
+namespace Improse\Render;
 
-class View extends Improse\View
+class Json
 {
     private $jsonData;
 
@@ -12,7 +11,7 @@ class View extends Improse\View
         $this->jsonData = $data;
     }
 
-    public function __invoke()
+    public function __invoke(array $exports)
     {
         header("Content-type: application/json", true);
         /*
@@ -27,7 +26,7 @@ class View extends Improse\View
         header("Access-Control-Allow-Headers: X-Requested-With");
         header("Access-Control-Allow-Credentials: true");
         header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
-        echo json_encode($this->jsonData, JSON_NUMERIC_CHECK);
+        echo json_encode($exports['data'], JSON_NUMERIC_CHECK);
     }
 }
 
