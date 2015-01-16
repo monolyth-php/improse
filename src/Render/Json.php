@@ -4,8 +4,6 @@ namespace Improse\Render;
 
 class Json
 {
-    private $jsonData;
-
     public function __invoke(array $exports)
     {
         header("Content-type: application/json", true);
