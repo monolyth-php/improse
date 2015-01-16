@@ -6,11 +6,6 @@ class Json
 {
     private $jsonData;
 
-    public function __construct($data)
-    {
-        $this->jsonData = $data;
-    }
-
     public function __invoke(array $exports)
     {
         header("Content-type: application/json", true);
