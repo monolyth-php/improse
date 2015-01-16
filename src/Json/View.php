@@ -1,9 +1,9 @@
 <?php
 
-namespace improse\Json;
-use improse;
+namespace Improse\Json;
+use Improse;
 
-class View extends improse\View
+class View extends Improse\View
 {
     private $jsonData;
 

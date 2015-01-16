@@ -1,9 +1,9 @@
 <?php
 
-namespace improse\Html;
-use improse;
+namespace Improse\Html;
+use Improse;
 
-class View extends improse\View
+class View extends Improse\View
 {
     public function __invoke()
     {

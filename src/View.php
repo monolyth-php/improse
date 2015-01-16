@@ -1,6 +1,6 @@
 <?php
 
-namespace improse;
+namespace Improse;
 
 abstract class View
 {
