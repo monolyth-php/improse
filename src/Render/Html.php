@@ -11,7 +11,7 @@ class Html
         $this->file = $file;
     }
 
-    public function __invoke(array $datamap)
+    public function __invoke(array $datamap = [])
     {
         foreach ($datamap as $__var => $__value) {
             $$__var = $__value;
@@ -24,7 +24,7 @@ class Html
     {
         static $called = false;
         if (!$called) {
-            header("Content-type: text/html; charset=utf-8");
+            @header("Content-type: text/html; charset=utf-8");
             $called = true;
         }
     }
