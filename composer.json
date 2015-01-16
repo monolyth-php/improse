@@ -1,0 +1,21 @@
+{
+    "name": "monomelodies/improse",
+    "description": "PHP5 View and templating system for MVC projects",
+    "license": "MIT",
+    "keywords": ["php","view","template","mvc"],
+    "authors": [
+        {
+            "name": "Marijn Ophorst",
+            "email": "marijn@monomelodies.nl"
+        }
+    ],
+    "require": {},
+    "require-dev": {
+        "phpunit/phpunit": "4.0.*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Improse\\": "src"
+        }
+    }
+}    
