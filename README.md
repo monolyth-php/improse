@@ -28,8 +28,8 @@ This is wrong for a number of reasons, all stemming from formal MVC theory:
 
 Improse is a simple view layer correcting these errors.
 
-Homepage: http://monomelodies.github.io/improse/
-Full documentation: http://improse.readthedocs.org/en/latest/
+* Homepage: http://monomelodies.github.io/improse/
+* Full documentation: http://improse.readthedocs.org/en/latest/
 
 ## Installation
 
