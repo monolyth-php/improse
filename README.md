@@ -39,7 +39,7 @@ Add "monomelodies/improse" to your `composer.json` requirements:
 
     {
         "require": {
-            "monomelodies/reroute": ">=0.4"
+            "monomelodies/improse": ">=0.4"
         }
     }
 
