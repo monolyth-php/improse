@@ -1,4 +1,4 @@
-# improse
+# Improse
 PHP5 View and templating system for MVC projects
 
 Surprisingly, most MVC frameworks out there get Controllers and Views utterly
@@ -22,32 +22,41 @@ This is wrong for a number of reasons, all stemming from formal MVC theory:
    instantiating a model and passing it on to the template/view.
 2. The template is acting as the View, which is wrong (they're separate
    concepts).
-3. There is now tight coupling between SomeController and SomeModel.
+3. There is now tight coupling between SomeController::indexAction and
+   SomeModel, which would only be relevant if the action changes something
+   (normally, a `POST` handler).
 
-Improse is an attempt to correct these errors.
+Improse is a simple view layer correcting these errors.
 
-Installation
-------------
+Homepage: http://monomelodies.github.io/improse/
+Full documentation: http://improse.readthedocs.org/en/latest/
 
-1. Clone the repository;
-2. Make sure your autoloader (PSR-4) knows about `/path/to/improse/src`.
+## Installation
 
-###Installation using Composer
+## Composer (recommended)
 
+Add "monomelodies/improse" to your `composer.json` requirements:
 
-1. Add a requirement to "monomelodies/improse" to your `composer.json`;
-2. Add Reroute to the autoload:psr-4 hash:
-    "autoload": {
-        "psr-4": {
-            "Improse": "src"
+    {
+        "require": {
+            "monomelodies/reroute": ">=0.4"
         }
     }
-3. Run `composer install`
 
-Usage
------
+...and run `$ composer update` from your project's root.
 
-###Basic views###
+## Manual installation
+1. Get the code;
+  1. Clone the repository, e.g. from GitHub;
+  2. Download the ZIP (e.g. from Github) and extract.
+2. Make your project recognize Improse:
+  1. Register `/path/to/improse/src` for the namespace `Improse\\` in your
+     PSR-4 autoloader (recommended);
+  2. Alternatively, manually `include` the files you need.
+
+## Usage
+
+###Basic views
 
 At its most basic, a View in Improse is an invokable class:
 
@@ -86,7 +95,7 @@ the view:
 
     <?=$view?>
 
-###Adding templates###
+###Adding templates
 
 Echoing tons of HTML in the invoke method is of course impractical. The simplest
 way of using one is simply including a HTML or PHP file in your invoke method:
