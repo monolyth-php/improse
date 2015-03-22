@@ -192,6 +192,11 @@ a static property which is merged with your view-specific data for this:
         static::$globalViewdata['title'] = $mypage['title'];
     }
 
+Templates can also return an array of key/value pairs which will be injected as
+global view data. If you use this technique, make sure the child template is
+`__toString()`'d before the parent template gets rendered, or obviously no data
+will be available yet.
+
 ## Using views in views
 
 ### Master templates
