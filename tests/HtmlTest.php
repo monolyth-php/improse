@@ -36,5 +36,21 @@ EOT
         $out = "$view";
         $this->assertEquals("<h1>Hello Mars!</h1>\n", $out);
     }
+
+    public function testViewDataPersists()
+    {
+        $view = new Test\View2(['test' => 'this is injected']);
+        $template = new Test\TemplateView(['helloWorld' => "$view"]);
+        $out = "$template";
+        $this->assertEquals(<<<EOT
+<div>this is injected
+    <h1>Hello world!</h1>
+</div>
+
+EOT
+            ,
+            $out
+        );
+    }
 }
 
