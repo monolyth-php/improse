@@ -4,8 +4,6 @@ namespace Improse;
 
 class Json extends View
 {
-    private $viewdata = [];
-
     /*
     public function __construct()
     {
@@ -20,15 +18,6 @@ class Json extends View
     {
         $__viewdata += $this->viewdata;
         return json_encode($__viewdata, JSON_NUMERIC_CHECK);
-    }
-
-    protected function headers()
-    {
-        static $called = false;
-        if (!$called) {
-            header("Content-type: application/json", true);
-            $called = true;
-        }
     }
 }
 
