@@ -5,12 +5,6 @@ namespace Improse;
 class Html extends View
 {
     protected $template;
-    private $viewdata = [];
-
-    public function __construct(array $data = [])
-    {
-        $this->viewdata = $data;
-    }
 
     public function __invoke(array $__viewdata = [])
     {
@@ -22,15 +16,6 @@ class Html extends View
             require $this->template;
             return ob_get_clean();
         });
-    }
-
-    protected function headers()
-    {
-        static $called = false;
-        if (!$called) {
-            @header("Content-type: text/html; charset=utf-8");
-            $called = true;
-        }
     }
 }
 
