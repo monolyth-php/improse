@@ -111,7 +111,8 @@ router you choose to use yield identical results:
     $page = '<h1>Hello world!</h1>';
     // or...
     $page = call_user_func(function() {
-        header("Content-type: text/html");
+        // Using a lambda here is slightly over the top, but it's there to
+        // make the point that the view could be anything.
         ob_start();
         include '/path/to/template.php';
         return ob_get_clean();
@@ -129,16 +130,19 @@ Let's say you like using Smarty. It's simple enough to integrate:
 
     <?php
 
-    use Improse\Html;
+    use Improse;
 
-    class View extends Html
+    class View extends Improse\View
     {
-        public function __invoke()
+        public function __invoke(array $__viewdata = [])
         {
             $smarty = new Smarty;
+
             // ...Additional Smarty config...
             // ...Add Smarty variables...
-            return parent::__invoke($smarty->fetch('page.tpl'));
+
+            // Finally, simply return the rendered string:
+            return $smarty->fetch('page.tpl');
         }
     }
 
