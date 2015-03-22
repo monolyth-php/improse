@@ -8,7 +8,7 @@ class Html extends View
 
     public function __invoke(array $viewdata = [])
     {
-        $this->viewdata = $viewdata + $this->viewdata;
+        $this->viewdata = $viewdata + $this->viewdata + static::$globalViewdata;
         return call_user_func(function () {
             extract($this->viewdata);
             ob_start();
