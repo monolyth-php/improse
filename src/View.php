@@ -4,6 +4,13 @@ namespace Improse;
 
 abstract class View
 {
+    protected $viewdata = [];
+
+    public function __construct(array $data = [])
+    {
+        $this->viewdata = $data;
+    }
+
     public function __toString()
     {
         $that = $this;
