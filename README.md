@@ -177,6 +177,21 @@ The idea is simple: whenever an Improse view is invoked, it optionally receives
 a hash of key/value pairs with view data. Since the template file itself is
 declared in a protected member, customizing and extending views is trivial.
 
+### Global data
+Some data should be global for reference in other, technically unrelated views.
+The title of a page (rendered in a master template, set from a page view is a
+good example, but something like the selected menu item also applies). I.e.,
+data set in a child view but rendered in a master view. Improse views contain
+a static property which is merged with your view-specific data for this:
+
+    <?php
+
+    class View
+    {
+        //...
+        static::$globalViewdata['title'] = $mypage['title'];
+    }
+
 ## Using views in views
 
 ### Master templates
