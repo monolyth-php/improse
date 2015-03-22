@@ -20,6 +20,11 @@ abstract class View
         return $that;
     }
 
+    public function export()
+    {
+        return $this->viewdata;
+    }
+
     public abstract function __invoke();
 }
 
