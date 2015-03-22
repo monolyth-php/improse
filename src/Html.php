@@ -14,17 +14,7 @@ class Html extends View
             ob_start();
             $return = require $this->template;
             if ($return && is_array($return)) {
-                foreach ($return as $key => $value) {
-                    if (array_key_exists($key, self::$globalViewdata)
-                        && is_null(self::$globalViewdata[$key])
-                    ) {
-                        unset(self::$globalViewdata[$key]);
-                    }
-                }
-                self::$globalViewdata = array_merge_recursive(
-                    self::$globalViewdata,
-                    $return
-                );
+                self::$globalViewdata = $return + self::$globalViewdata;
             }
             return ob_get_clean();
         });
