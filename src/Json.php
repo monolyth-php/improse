@@ -4,20 +4,10 @@ namespace Improse;
 
 class Json extends View
 {
-    /*
-    public function __construct()
+    public function __invoke(array $viewdata = [])
     {
-        //header("Content-type: application/json", true);
-        //header("Access-Control-Allow-Headers: X-Requested-With");
-        //header("Access-Control-Allow-Credentials: true");
-        //header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
-    }
-    */
-
-    public function __invoke(array $__viewdata = [])
-    {
-        $__viewdata += $this->viewdata;
-        return json_encode($__viewdata, JSON_NUMERIC_CHECK);
+        $this->viewdata = $viewdata + $this->viewdata;
+        return json_encode($this->viewdata, JSON_NUMERIC_CHECK);
     }
 }
 
