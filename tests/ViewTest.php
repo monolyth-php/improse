@@ -1,49 +1,34 @@
 <?php
 
-use Improse\View;
 use Improse\Render\Html;
 
-class TestView1 extends View
-{
-    public function __invoke()
-    {
-        return 'Hello world!';
-    }
-}
-
-class TestView2 extends View
-{
-    public function __invoke()
-    {
-        $out = new Html(dirname(__FILE__).'/_files/helloworld.php');
-        return $out();
-    }
-}
+set_include_path(dirname(__FILE__).PATH_SEPARATOR.get_include_path());
+require_once dirname(__FILE__).'/Test/View1.php';
+require_once dirname(__FILE__).'/Test/View2.php';
+require_once dirname(__FILE__).'/Test/View3.php';
+require_once dirname(__FILE__).'/Test/TemplateView.php';
 
 class ViewTest extends PHPUnit_Framework_TestCase
 {
     public function testView()
     {
-        $view = new TestView1;
-        $out = $view();
+        $view = new Test\View1;
+        $out = "$view";
         $this->assertEquals('Hello world!', $out);
     }
 
     public function testViewWithHtml()
     {
-        $view = new TestView2;
-        $out = $view();
+        $view = new Test\View2;
+        $out = "$view";
         $this->assertEquals("<h1>Hello world!</h1>\n", $out);
     }
 
     public function testViewTemplate()
     {
-        $view = new TestView2;
-        $template = new Html(
-            dirname(__FILE__).'/_files/template.php',
-            ['helloWorld' => $view]
-        );
-        $out = $template();
+        $view = new Test\View2;
+        $template = new Test\TemplateView(['helloWorld' => $view]);
+        $out = "$template";
         $this->assertEquals(<<<EOT
 <div>
     <h1>Hello world!</h1>
@@ -53,6 +38,13 @@ EOT
             ,
             $out
         );
+    }
+
+    public function testViewWithData()
+    {
+        $view = new Test\View3;
+        $out = "$view";
+        $this->assertEquals("<h1>Hello Mars!</h1>\n", $out);
     }
 }
 
