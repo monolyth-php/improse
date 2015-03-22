@@ -4,19 +4,15 @@ namespace Improse;
 
 abstract class View
 {
-    protected $_template;
-    protected $_exports = [];
-
-    public function __invoke()
+    public function __toString()
     {
-        if ($this->_exports) {
-            foreach ($this->_exports as $__var) {
-                $$__var = $this->$__var;
-            }
+        $that = $this;
+        while (is_callable($that)) {
+            $that = $that();
         }
-        if (isset($this->_template)) {
-            include $this->_template;
-        }
+        return $that;
     }
+
+    public abstract function __invoke();
 }
 
