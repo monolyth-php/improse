@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
+
+    <title>Improse by monomelodies</title>
+  </head>
+
+  <body>
+
+    <header>
+      <div class="container">
+        <h1>Improse</h1>
+        <h2>PHP5 MVC view library</h2>
+
+        <section id="downloads">
+          <a href="https://github.com/monomelodies/improse/zipball/master" class="btn">Download as .zip</a>
+          <a href="https://github.com/monomelodies/improse/tarball/master" class="btn">Download as .tar.gz</a>
+          <a href="https://github.com/monomelodies/improse" class="btn btn-github"><span class="icon"></span>View on GitHub</a>
+        </section>
+      </div>
+    </header>
+
+    <div class="container">
+      <section id="main_content">
+        <h1>
+<a id="improse" class="anchor" href="#improse" aria-hidden="true"><span class="octicon octicon-link"></span></a>Improse</h1>
+
+<p>PHP5 View and templating system for MVC projects</p>
+
+<p>Surprisingly, most MVC frameworks out there get Controllers and Views utterly
+wrong. If you've ever worked with one, you'll recognize the following pattern:</p>
+
+<pre><code>&lt;?php
+
+class SomeController extends BaseController
+{
+    public function actionIndex()
+    {
+        $this-&gt;data = new SomeModel;
+        $this-&gt;render('path/to/template.php', ['data' =&gt; $this-&gt;data]);
+    }
+}
+</code></pre>
+
+<p>This is wrong for a number of reasons, all stemming from formal MVC theory:</p>
+
+<ol>
+<li>The View (which in the above case is actually a template, which is something
+different) is responsible for its own data. Here it is not; the Controller is
+instantiating a model and passing it on to the template/view.</li>
+<li>The template is acting as the View, which is wrong (they're separate
+concepts).</li>
+<li>There is now tight coupling between SomeController::indexAction and
+SomeModel, which would only be relevant if the action changes something
+(normally, a <code>POST</code> handler).</li>
+</ol>
+
+<p>Improse is a simple view layer correcting these errors.</p>
+
+<ul>
+<li>Homepage: <a href="http://monomelodies.github.io/improse/">http://monomelodies.github.io/improse/</a>
+</li>
+<li>Full documentation: <a href="http://improse.readthedocs.org/en/latest/">http://improse.readthedocs.org/en/latest/</a>
+</li>
+</ul>
+
+<h2>
+<a id="installation" class="anchor" href="#installation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Installation</h2>
+
+<h3>
+<a id="composer-recommended" class="anchor" href="#composer-recommended" aria-hidden="true"><span class="octicon octicon-link"></span></a>Composer (recommended)</h3>
+
+<p>Add "monomelodies/improse" to your <code>composer.json</code> requirements:</p>
+
+<pre><code>{
+    "require": {
+        "monomelodies/improse": "&gt;=0.4"
+    }
+}
+</code></pre>
+
+<p>...and run <code>$ composer update</code> from your project's root.</p>
+
+<h3>
+<a id="manual-installation" class="anchor" href="#manual-installation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Manual installation</h3>
+
+<ol>
+<li>Get the code;
+
+<ol>
+<li>Clone the repository, e.g. from GitHub;</li>
+<li>Download the ZIP (e.g. from Github) and extract.</li>
+</ol>
+</li>
+<li>Make your project recognize Improse:
+
+<ol>
+<li>Register <code>/path/to/improse/src</code> for the namespace <code>Improse\\</code> in your
+PSR-4 autoloader (recommended);</li>
+<li>Alternatively, manually <code>include</code> the files you need.</li>
+</ol>
+</li>
+</ol>
+
+<h2>
+<a id="basic-usage" class="anchor" href="#basic-usage" aria-hidden="true"><span class="octicon octicon-link"></span></a>Basic usage</h2>
+
+<p>For examples and full explanation, see the documentation.</p>
+
+<h3>
+<a id="basic-views" class="anchor" href="#basic-views" aria-hidden="true"><span class="octicon octicon-link"></span></a>Basic views</h3>
+
+<p>An Improse view is simply an invokable class. The base class also provides a
+<code>__toString</code> method that invokes-till-it-can-invoke-no-more:</p>
+
+<pre><code>&lt;?php
+
+use Improse;
+
+class View extends Improse\View
+{
+    public function __invoke()
+    {
+        return '&lt;h1&gt;Hello world!&lt;/h1&gt;';
+    }
+}
+</code></pre>
+
+<p>Then, wherever you need it rendered, simply <code>__toString</code> it:</p>
+
+<pre><code>&lt;body&gt;
+    &lt;!-- assuming $view is an object of the above View class: --&gt;
+    &lt;?=$view?&gt;
+&lt;/body&gt;
+</code></pre>
+
+<h3>
+<a id="adding-templates" class="anchor" href="#adding-templates" aria-hidden="true"><span class="octicon octicon-link"></span></a>Adding templates</h3>
+
+<p>Echoing tons of HTML in the invoke method is of course impractical. What most
+MVC frameworks erronously call "the view" is actually a <em>template</em> (usually
+HTML, but could be anything a browser groks).</p>
+
+<p>Instead of extending the base <code>View</code> class (which in practice you'll amost never
+do anyway), extend one of the <code>Improse\View\*</code> classes.</p>
+
+<pre><code>&lt;?php
+
+use Improse\Html;
+
+class View extends Html
+{
+    protected $template = '/path/to/template.php';
+}
+</code></pre>
+
+<h3>
+<a id="simplifying-things" class="anchor" href="#simplifying-things" aria-hidden="true"><span class="octicon octicon-link"></span></a>Simplifying things</h3>
+
+<p>Obviously, views not requiring any additional data seem rather superfluous.
+In fact, that's exactly the idea! If your page is <em>that</em> static, you shouldn't
+need a View at all (well, except for headers maybe, but a controller can set
+those too).</p>
+
+<p>Using the above example classes, the following three resolves for whatever
+router you choose to use yield identical results:</p>
+
+<pre><code>$page = new View;
+// or (assuming template.php contains that string of HTML)...
+$page = '&lt;h1&gt;Hello world!&lt;/h1&gt;';
+// or...
+$page = call_user_func(function() {
+    // Using a lambda here is slightly over the top, but it's there to
+    // make the point that the view could be anything.
+    ob_start();
+    include '/path/to/template.php';
+    return ob_get_clean();
+});
+// Output:
+echo $page;
+</code></pre>
+
+<p>As you can see, you can mix and match anything, as long as your rendering code
+is clear on whether to expect a callable or a string. No need whatsoever to use
+Improse views throughout your project!</p>
+
+<h3>
+<a id="using-an-external-templating-engine" class="anchor" href="#using-an-external-templating-engine" aria-hidden="true"><span class="octicon octicon-link"></span></a>Using an external templating engine</h3>
+
+<p>Let's say you like using Smarty. It's simple enough to integrate:</p>
+
+<pre><code>&lt;?php
+
+use Improse;
+
+class View extends Improse\View
+{
+    public function __invoke(array $__viewdata = [])
+    {
+        $smarty = new Smarty;
+
+        // ...Additional Smarty config...
+        // ...Add Smarty variables...
+
+        // Finally, simply return the rendered string:
+        return $smarty-&gt;fetch('page.tpl');
+    }
+}
+</code></pre>
+
+<p>Similar setups can be used for other engines, e.g. Twig.</p>
+
+<h2>
+<a id="handling-data" class="anchor" href="#handling-data" aria-hidden="true"><span class="octicon octicon-link"></span></a>Handling data</h2>
+
+<p>Since the whole idea of having a View object is to let it take care of its own
+data, let's show an example of that, too:</p>
+
+<pre><code>&lt;?php
+
+use Improse\Html;
+
+class View extends Html
+{
+    protected $template = '/path/to/template.php';
+
+    public function __invoke()
+    {
+        // Obviously, in a real world example you'd be better off storing
+        // this in some central config and dependency injecting it...
+        $db = new PDO('dsn', 'user', 'pass');
+        $stmt = $db-&gt;prepare('SELECT * FROM foo WHERE bar = ?');
+        $stmt-&gt;execute(['value-for-bar']);
+        return parent::__invoke([
+            'rows' =&gt; $stmt-&gt;fetchAll(PDO::FETCH_ASSOC),
+        ]);
+    }
+}
+</code></pre>
+
+<p>The idea is simple: whenever an Improse view is invoked, it optionally receives
+a hash of key/value pairs with view data. Since the template file itself is
+declared in a protected member, customizing and extending views is trivial.</p>
+
+<h2>
+<a id="using-views-in-views" class="anchor" href="#using-views-in-views" aria-hidden="true"><span class="octicon octicon-link"></span></a>Using views in views</h2>
+
+<h3>
+<a id="master-templates" class="anchor" href="#master-templates" aria-hidden="true"><span class="octicon octicon-link"></span></a>Master templates</h3>
+
+<p>Most of the time, a regular HTML page being rendered will use a master template
+of sorts containg headers, menus and footers. To achieve this, simply define a
+central view containing this template, decide on a variable name to use for your
+injected page-specific view and have your controller/router inject it where
+needed:</p>
+
+<pre><code>&lt;?php
+
+use Improse\Html;
+
+class MasterView extends Html
+{
+    protected $template = '/path/to/template.php';
+}
+</code></pre>
+
+<p>...and in <code>template.php</code>:</p>
+
+<pre><code>&lt;html&gt;
+    &lt;...other html...&gt;
+    &lt;?=$content?&gt;
+&lt;/html&gt;
+</code></pre>
+
+<p>...and wherever you decide a page is being rendered:</p>
+
+<pre><code>&lt;?php
+
+$view = new View(['some' =&gt; 'data']);
+$template = new MasterView(['content' =&gt; $view]);
+</code></pre>
+
+<p>Depending on what other framework(s) you use, you should factor this away to a
+central place. E.g., using <code>Reroute</code> for your routing, you could group all page
+routes in an <code>html</code> group and inject the view into a master centrally. This way,
+both the views as well as the templates are completely reusable as snippets (see
+below), and the template injection is handled where it should (by the front
+controller, which is after all where it is decided that the user is requesting
+a full blown HTML page).</p>
+
+<h3>
+<a id="snippets" class="anchor" href="#snippets" aria-hidden="true"><span class="octicon octicon-link"></span></a>Snippets</h3>
+
+<p>Often, you will also want to define "snippets" of HTML for the rendering of
+recurring partials. Often you can do a simple <code>include</code> on the PHP file in
+question, but if you need/like your data to be encapsulated, or need to use
+some external templating engine, Improse has you covered:</p>
+
+<pre><code>&lt;?php use Improse\Html ?&gt;
+&lt;ul&gt;
+&lt;?php foreach ($list as $item) { ?&gt;
+    &lt;?=(new Html('/path/to/my/list/item.php'))(compact('item'))?&gt;
+&lt;?php } ?&gt;
+&lt;/ul&gt;
+</code></pre>
+
+<p>A good strategy here is to load the item view in the page view and pass it in a
+variable. This can define all 'global' variables that every instance of the
+snippet needs. Then, when rendering, just pass the instance-specific variables
+in when invoking.</p>
+      </section>
+    </div>
+
+    
+  </body>
+</html>
