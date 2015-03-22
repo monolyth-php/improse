@@ -1,5 +1,5 @@
 <div>
 <?php if (isset($helloWorld)) { ?>
-    <?=$helloWorld()?>
+    <?=$helloWorld?>
 <?php } ?>
 </div>
