@@ -8,21 +8,21 @@ class Html extends View
 
     public function __invoke(array $viewdata = [])
     {
-        $this->viewdata = $viewdata + $this->viewdata + static::$globalViewdata;
+        $this->viewdata = $viewdata + $this->viewdata + self::$globalViewdata;
         return call_user_func(function () {
             extract($this->viewdata);
             ob_start();
             $return = require $this->template;
             if ($return && is_array($return)) {
                 foreach ($return as $key => $value) {
-                    if (array_key_exists($key, static::$globalViewdata)
-                        && is_null(static::$globalViewdata[$key])
+                    if (array_key_exists($key, self::$globalViewdata)
+                        && is_null(self::$globalViewdata[$key])
                     ) {
-                        unset(static::$globalViewdata[$key]);
+                        unset(self::$globalViewdata[$key]);
                     }
                 }
-                static::$globalViewdata = array_merge_recursive(
-                    static::$globalViewdata,
+                self::$globalViewdata = array_merge_recursive(
+                    self::$globalViewdata,
                     $return
                 );
             }
