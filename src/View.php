@@ -5,6 +5,7 @@ namespace Improse;
 abstract class View
 {
     protected $viewdata = [];
+    protected static $globalViewdata = [];
 
     public function __construct(array $data = [])
     {
@@ -22,7 +23,7 @@ abstract class View
 
     public function export()
     {
-        return $this->viewdata;
+        return $this->viewdata + static::$globalViewdata;
     }
 
     public abstract function __invoke();
