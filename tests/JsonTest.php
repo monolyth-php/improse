@@ -14,7 +14,10 @@ class JsonTest extends PHPUnit_Framework_TestCase
             'barf' => ['fizz', 'bizz'],
         ]);
         $out = "$view";
-        $this->assertEquals("<h1>Hello world!</h1>\n", $out);
+        $this->assertEquals(
+            '{"foo":"bar","baz":[1,2],"barf":["fizz","bizz"]}',
+            $out
+        );
     }
 }
 
