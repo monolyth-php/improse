@@ -33,7 +33,7 @@ Improse is a simple view layer correcting these errors.
 
 ## Installation
 
-## Composer (recommended)
+### Composer (recommended)
 
 Add "monomelodies/improse" to your `composer.json` requirements:
 
@@ -45,7 +45,7 @@ Add "monomelodies/improse" to your `composer.json` requirements:
 
 ...and run `$ composer update` from your project's root.
 
-## Manual installation
+### Manual installation
 1. Get the code;
   1. Clone the repository, e.g. from GitHub;
   2. Download the ZIP (e.g. from Github) and extract.
@@ -58,7 +58,8 @@ Add "monomelodies/improse" to your `composer.json` requirements:
 For examples and full explanation, see the documentation.
 
 ### Basic views
-An Improse view is simply an invokable class:
+An Improse view is simply an invokable class. The base class also provides a
+`__toString` method that invokes-till-it-can-invoke-no-more:
 
     <?php
 
@@ -72,47 +73,31 @@ An Improse view is simply an invokable class:
         }
     }
 
-Then, wherever you need it rendered, simply call it:
+Then, wherever you need it rendered, simply `__toString` it:
 
     <body>
         <!-- assuming $view is an object of the above View class: -->
-        <?=$view()?>
+        <?=$view?>
     </body>
-
-Improse views support `__toString` which effectively invokes the view. The
-result keeps getting invoked until it is no longer invokable, allowing you to
-"chain" views.
-
-    <?=$view?>
 
 ### Adding templates
 Echoing tons of HTML in the invoke method is of course impractical. What most
 MVC frameworks erronously call "the view" is actually a _template_ (usually
 HTML, but could be anything a browser groks).
 
-The easiest way of using a template is having your `__invoke` method return an
-instance of `Improse\Render\Html` (or one of the other supplied classes
-depending on what your URL is supposed to render). All `Render` classes take two
-constructor arguments: the path to the template (must be in your `include_path`)
-and an array of data for the template to use.
+Instead of extending the base `View` class (which in practice you'll amost never
+do anyway), extend one of the `Improse\View\*` classes.
 
     <?php
 
-    use Improse;
-    use Improse\Render\Html;
+    use Improse\Html;
 
-    class View extends Improse\View
+    class View extends Html
     {
-        public function __invoke()
-        {
-            return new Html('/path/to/template.php');
-        }
+        protected $template = '/path/to/template.php';
     }
 
-All `Render` classes are callable in their own right.
-
 ### Simplifying things
-
 Obviously, views not requiring any additional data seem rather superfluous.
 In fact, that's exactly the idea! If your page is _that_ static, you shouldn't
 need a View at all (well, except for headers maybe, but a controller can set
@@ -122,15 +107,17 @@ Using the above example classes, the following three resolves for whatever
 router you choose to use yield identical results:
 
     $page = new View;
+    // or (assuming template.php contains that string of HTML)...
+    $page = '<h1>Hello world!</h1>';
     // or...
-    $page = new Html('/path/to/template.php');
-    // or...
-    $page = function() {
+    $page = call_user_func(function() {
         header("Content-type: text/html");
+        ob_start();
         include '/path/to/template.php';
-    };
+        return ob_get_clean();
+    });
     // Output:
-    echo $page();
+    echo $page;
 
 As you can see, you can mix and match anything, as long as your rendering code
 is clear on whether to expect a callable or a string. No need whatsoever to use
@@ -142,15 +129,16 @@ Let's say you like using Smarty. It's simple enough to integrate:
 
     <?php
 
-    use Improse;
+    use Improse\Html;
 
-    class View extends Improse\View
+    class View extends Html
     {
         public function __invoke()
         {
             $smarty = new Smarty;
             // ...Additional Smarty config...
-            return $smarty->fetch('page.tpl');
+            // ...Add Smarty variables...
+            return parent::__invoke($smarty->fetch('page.tpl'));
         }
     }
 
@@ -162,11 +150,12 @@ data, let's show an example of that, too:
 
     <?php
 
-    use Improse;
-    use Improse\Render\Html;
+    use Improse\Html;
 
-    class View extends Improse\View
+    class View extends Html
     {
+        protected $template = '/path/to/template.php';
+
         public function __invoke()
         {
             // Obviously, in a real world example you'd be better off storing
@@ -174,71 +163,71 @@ data, let's show an example of that, too:
             $db = new PDO('dsn', 'user', 'pass');
             $stmt = $db->prepare('SELECT * FROM foo WHERE bar = ?');
             $stmt->execute(['value-for-bar']);
-            return new Html(
-                '/path/to/template.php',
-                ['rows' => $stmt->fetchAll(PDO::FETCH_ASSOC)]
-            );
+            return parent::__invoke([
+                'rows' => $stmt->fetchAll(PDO::FETCH_ASSOC),
+            ]);
         }
     }
+
+The idea is simple: whenever an Improse view is invoked, it optionally receives
+a hash of key/value pairs with view data. Since the template file itself is
+declared in a protected member, customizing and extending views is trivial.
 
 ## Using views in views
 
-Websites rarely use a unique template for every page, but prefer to use a
-"template-template" with stuff common to every page on the site. You could
-easily do that by manually including something like `tpl/start.php` and
-`tpl/end.php` in each view invocation, but naturally that would lead to
-undesired code duplication.
-
-In Improse, just inject your subtemplate into the master template on invocation:
+### Master templates
+Most of the time, a regular HTML page being rendered will use a master template
+of sorts containg headers, menus and footers. To achieve this, simply define a
+central view containing this template, decide on a variable name to use for your
+injected page-specific view and have your controller/router inject it where
+needed:
 
     <?php
 
-    use Improse\Render\Html;
+    use Improse\Html;
 
-    $view = new MyView;
-    $template = new Html('/path/to/my/template.php', ['subview' => $view]);
-    echo $template;
+    class MasterView extends Html
+    {
+        protected $template = '/path/to/template.php';
+    }
 
-Then, in `template.php`, you can do this:
+...and in `template.php`:
 
-    <h1>My title!</h1>
+    <html>
+        <...other html...>
+        <?=$content?>
+    </html>
 
-    <?=$subview?>
+...and wherever you decide a page is being rendered:
 
+    <?php
+
+    $view = new View(['some' => 'data']);
+    $template = new MasterView(['content' => $view]);
+
+Depending on what other framework(s) you use, you should factor this away to a
+central place. E.g., using `Reroute` for your routing, you could group all page
+routes in an `html` group and inject the view into a master centrally. This way,
+both the views as well as the templates are completely reusable as snippets (see
+below), and the template injection is handled where it should (by the front
+controller, which is after all where it is decided that the user is requesting
+a full blown HTML page).
+
+### Snippets
 Often, you will also want to define "snippets" of HTML for the rendering of
-recurring partials. Improse has you covered:
+recurring partials. Often you can do a simple `include` on the PHP file in
+question, but if you need/like your data to be encapsulated, or need to use
+some external templating engine, Improse has you covered:
 
-    <?php use Improse\Render\Html ?>
+    <?php use Improse\Html ?>
     <ul>
     <?php foreach ($list as $item) { ?>
-        <?=(new Html('/path/to/my/list/item.php', compact('item')))?>
+        <?=(new Html('/path/to/my/list/item.php'))(compact('item'))?>
     <?php } ?>
     </ul>
 
-Of course, you could also export prepared views from a View class:
-
-    <?php
-
-    use Improse\View;
-    use Improse\Render\Html;
-
-    class MyView extends View
-    {
-        public function __construct()
-        {
-            $this->listView = new Html('/path/to/my/list/item.php');
-            $this->list = [1, 2, 3];
-        }
-
-        public function __invoke()
-        {
-            return new Html(
-                '/path/to/my/page.php',
-                [
-                    'list' => $this->list,
-                    'listView' => $this->listView,
-                ]
-            );
-        }
-    }
+A good strategy here is to load the item view in the page view and pass it in a
+variable. This can define all 'global' variables that every instance of the
+snippet needs. Then, when rendering, just pass the instance-specific variables
+in when invoking.
 
