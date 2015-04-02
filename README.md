@@ -97,6 +97,11 @@ do anyway), extend one of the `Improse\View\*` classes.
         protected $template = '/path/to/template.php';
     }
 
+If the `$template` property is missing, the `Html` view will guess its name
+according to the classname; i.e., `\Foo\Bar\View` will look for a template
+called `/foo/bar/template.php`, whereas `Foo\BarView` will look for
+`/foo/bar.php` by default.
+
 ### Simplifying things
 Obviously, views not requiring any additional data seem rather superfluous.
 In fact, that's exactly the idea! If your page is _that_ static, you shouldn't
