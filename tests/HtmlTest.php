@@ -3,6 +3,8 @@
 set_include_path(dirname(__FILE__).PATH_SEPARATOR.get_include_path());
 require_once dirname(__FILE__).'/Test/View2.php';
 require_once dirname(__FILE__).'/Test/View3.php';
+require_once dirname(__FILE__).'/Test/Template/View.php';
+require_once dirname(__FILE__).'/Test/Template/NamedView.php';
 require_once dirname(__FILE__).'/Test/TemplateView.php';
 
 class HtmlTest extends PHPUnit_Framework_TestCase
@@ -51,6 +53,16 @@ EOT
             ,
             $out
         );
+    }
+
+    public function testDefaultTemplate()
+    {
+        $view = new Test\Template\View;
+        $out = "$view";
+        $this->assertEquals('default view', trim($out));
+        $view = new Test\Template\NamedView;
+        $out = "$view";
+        $this->assertEquals('named view', trim($out));
     }
 }
 
