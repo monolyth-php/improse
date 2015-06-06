@@ -1,5 +1,5 @@
 # Improse
-PHP5 View and templating system for MVC projects
+PHP5 View and templating front for MVC projects
 
 Surprisingly, most MVC frameworks out there get Controllers and Views utterly
 wrong. If you've ever worked with one, you'll recognize the following pattern:
@@ -29,234 +29,171 @@ This is wrong for a number of reasons, all stemming from formal MVC theory:
 Improse is a simple view layer correcting these errors.
 
 * [Homepage](http://monomelodies.github.io/improse/)
-* [Full documentation] (http://improse.readthedocs.org/en/latest/)
+* [Full documentation](http://improse.readthedocs.org/en/latest/)
 
 ## Installation
-
-### Composer (recommended)
-
-Add "monomelodies/improse" to your `composer.json` requirements:
-
-    {
-        "require": {
-            "monomelodies/improse": ">=0.4"
-        }
-    }
-
-...and run `$ composer update` from your project's root.
-
-### Manual installation
-1. Get the code;
-  1. Clone the repository, e.g. from GitHub;
-  2. Download the ZIP (e.g. from Github) and extract.
-2. Make your project recognize Improse:
-  1. Register `/path/to/improse/src` for the namespace `Improse\\` in your
-     PSR-4 autoloader (recommended);
-  2. Alternatively, manually `include` the files you need.
+[See the corresponding section in the documentation.](basic/installation.md)
 
 ## Basic usage
-For examples and full explanation, see the documentation.
+[For more detailed explanation and examples, see the documentation.](basic/views.md)
 
-### Basic views
 An Improse view is simply an invokable class. The base class also provides a
 `__toString` method that invokes-till-it-can-invoke-no-more:
 
-    <?php
+```php
+<?php
 
-    use Improse;
+use Improse;
 
-    class View extends Improse\View
+class View extends Improse\View
+{
+    public function __invoke()
     {
-        public function __invoke()
-        {
-            return '<h1>Hello world!</h1>';
-        }
+        return '<h1>Hello world!</h1>';
     }
+}
+```
 
 Then, wherever you need it rendered, simply `__toString` it:
 
-    <body>
-        <!-- assuming $view is an object of the above View class: -->
-        <?=$view?>
-    </body>
+```html
+<body>
+    <!-- assuming $view is an object of the above View class: -->
+    <?=$view?>
+</body>
+```
 
-### Adding templates
+## Adding templates
 Echoing tons of HTML in the invoke method is of course impractical. What most
-MVC frameworks erronously call "the view" is actually a _template_ (usually
-HTML, but could be anything a browser groks).
+MVC frameworks erroneously call "the view" is actually a _template_ (usually
+`HTML`, but could be anything a browser groks like `XML` or `Json`, or - for
+completeness sake - some other output alltogether, like an `ODF` document).
 
-Instead of extending the base `View` class (which in practice you'll amost never
-do anyway), extend one of the `Improse\View\*` classes.
+Improse is _not_ a templating engine. Other projects exist for that, e.g.
+[Twig](http://twig.sensiolabs.org) or [Smarty](http://www.smarty.net/).
+[See the example on template integration in the docs.](basic/templates.md)
 
-    <?php
+If you're comfortable with using PHP-as-a-templating-engine, Improse offers an
+extermely basic `Html` view. This simply `include`s the template as defined on
+the procted property `$template` in your view, exposing local variables as
+passed to the `__invoke` method:
 
-    use Improse\Html;
+```php
+<?php
 
-    class View extends Html
+use Improse\Html;
+
+class View extends Html
+{
+    protected $template = '/path/to/template.php';
+
+    public function __invoke()
     {
-        protected $template = '/path/to/template.php';
+        return parent::__invoke(['place' => 'world']);
     }
+```
 
-If the `$template` property is missing, the `Html` view will guess its name
-according to the classname; i.e., `\Foo\Bar\View` will look for a template
-called `/foo/bar/template.php`, whereas `Foo\BarView` will look for
-`/foo/bar.php` by default.
-
-### Simplifying things
-Obviously, views not requiring any additional data seem rather superfluous.
-In fact, that's exactly the idea! If your page is _that_ static, you shouldn't
-need a View at all (well, except for headers maybe, but a controller can set
-those too).
-
-Using the above example classes, the following three resolves for whatever
-router you choose to use yield identical results:
-
-    $page = new View;
-    // or (assuming template.php contains that string of HTML)...
-    $page = '<h1>Hello world!</h1>';
-    // or...
-    $page = call_user_func(function() {
-        // Using a lambda here is slightly over the top, but it's there to
-        // make the point that the view could be anything.
-        ob_start();
-        include '/path/to/template.php';
-        return ob_get_clean();
-    });
-    // Output:
-    echo $page;
-
-As you can see, you can mix and match anything, as long as your rendering code
-is clear on whether to expect a callable or a string. No need whatsoever to use
-Improse views throughout your project!
-
-### Using an external templating engine
-
-Let's say you like using Smarty. It's simple enough to integrate:
-
-    <?php
-
-    use Improse;
-
-    class View extends Improse\View
-    {
-        public function __invoke(array $__viewdata = [])
-        {
-            $smarty = new Smarty;
-
-            // ...Additional Smarty config...
-            // ...Add Smarty variables...
-
-            // Finally, simply return the rendered string:
-            return $smarty->fetch('page.tpl');
-        }
-    }
-
-Similar setups can be used for other engines, e.g. Twig.
+```html
+<h1>Hello <?=$place?>!</h1>
+```
 
 ## Handling data
-Since the whole idea of having a View object is to let it take care of its own
-data, let's show an example of that, too:
+Nest views extending the data array passed to each `__invoke` parent call if
+you need to "build on top" of a view. Keep it DRY!
 
-    <?php
+An example where this could be useful is e.g. a blog where reading a post is a
+dedicated page with a view, but showing comments is that same view, only with
+an opened comment secion. The view `PostWithCommentsView` could then extend the
+`PostView` and just add the comments.
 
-    use Improse\Html;
+> Of course this trivial problem could also be solved by passing a parameter
+> to the View's constructor, e.g. `$showComments = false`, but you get the idea.
+> In complex setups, extend views is super-duper handy.
 
-    class View extends Html
+## Simplifying things
+Obviously, views not requiring any additional data seem rather superfluous.
+In fact, that's exactly the idea! If your page is _that_ static, you shouldn't
+need a View (or a Controller for that matter at all (well, except for headers
+maybe, but a front controller can set those too).
+
+We'd recommend sticking to the following workflow:
+
+- The _front controller_ parsers the request and decides which piece of logic
+  needs to kick in;
+- For _static pages_, just output a template;
+- For _read-only page with data_, setup the corresponding view and render it
+  (or usually its template);
+- For _dynamic pages handling user interaction_, first setup the corresponding
+  controller and let it do its stuff. Next, setup the corresonding view and
+  render it (or usually its template) depending on controller success.
+
+## Snippets
+"Snippets" are subtemplates that appear in recurring places (e.g. a sidebar
+with "recent posts" on a blog that's shown on every page). Ideally, such a
+snippet would use its own view taking care of its own data.
+
+Improse views are designed to be "`__toString`able", so this is easy:
+
+```php
+<?php
+
+use Improse\View;
+
+class MyblogpageView extends View
+{
+    public function __construct()
     {
-        protected $template = '/path/to/template.php';
+        parent::__construct();
+        // ...other stuff needed...
 
-        public function __invoke()
-        {
-            // Obviously, in a real world example you'd be better off storing
-            // this in some central config and dependency injecting it...
-            $db = new PDO('dsn', 'user', 'pass');
-            $stmt = $db->prepare('SELECT * FROM foo WHERE bar = ?');
-            $stmt->execute(['value-for-bar']);
-            return parent::__invoke([
-                'rows' => $stmt->fetchAll(PDO::FETCH_ASSOC),
-            ]);
+        $this->recents = new RecentpostView;
+    }
+
+    // Example invocation:
+    public function __invoke()
+    {
+        echo '<h1>my blog page!</h1>';
+        // Sidebar:
+        echo '<aside>';
+        echo $this->recents;
+        echo '</aside>';
+}
+```
+...and the RecentpostView:
+```
+<?php
+
+use Improse\View;
+
+class RecentpostView extends View
+{
+    public function __construct()
+    {
+        // ...
+        // Wherever you get them from:
+        $this->posts = getRecentPosts();
+    }
+
+    public function __invoke()
+    {
+        echo '<ul>';
+        foreach ($this->posts as $post) {
+            echo '<li>'.$post['title'].'</li>';
         }
-    }
+        echo '</ul>';
+}
+```
+When using templates, simply rely on the `__toString` method being called and
+let the subview load its own template. E.g., using Twig:
+```html
+<h1>my blog page!</h1>
+<aside>
+    {{ recents }}
+</aside>
+```
 
-The idea is simple: whenever an Improse view is invoked, it optionally receives
-a hash of key/value pairs with view data. Since the template file itself is
-declared in a protected member, customizing and extending views is trivial.
-
-### Global data
-Some data should be global for reference in other, technically unrelated views.
-The title of a page (rendered in a master template, set from a page view is a
-good example, but something like the selected menu item also applies). I.e.,
-data set in a child view but rendered in a master view. Improse views contain
-a static property which is merged with your view-specific data for this:
-
-    <?php
-
-    class View
-    {
-        //...
-        static::$globalViewdata['title'] = $mypage['title'];
-    }
-
-Templates can also return an array of key/value pairs which will be injected as
-global view data. If you use this technique, make sure the child template is
-`__toString()`'d before the parent template gets rendered, or obviously no data
-will be available yet.
-
-## Using views in views
-
-### Master templates
-Most of the time, a regular HTML page being rendered will use a master template
-of sorts containg headers, menus and footers. To achieve this, simply define a
-central view containing this template, decide on a variable name to use for your
-injected page-specific view and have your controller/router inject it where
-needed:
-
-    <?php
-
-    use Improse\Html;
-
-    class MasterView extends Html
-    {
-        protected $template = '/path/to/template.php';
-    }
-
-...and in `template.php`:
-
-    <html>
-        <...other html...>
-        <?=$content?>
-    </html>
-
-...and wherever you decide a page is being rendered:
-
-    <?php
-
-    $view = new View(['some' => 'data']);
-    $template = new MasterView(['content' => $view]);
-
-Depending on what other framework(s) you use, you should factor this away to a
-central place. E.g., using `Reroute` for your routing, you could group all page
-routes in an `html` group and inject the view into a master centrally. This way,
-both the views as well as the templates are completely reusable as snippets (see
-below), and the template injection is handled where it should (by the front
-controller, which is after all where it is decided that the user is requesting
-a full blown HTML page).
-
-### Snippets
-Often, you will also want to define "snippets" of HTML for the rendering of
-recurring partials. Often you can do a simple `include` on the PHP file in
-question, but if you need/like your data to be encapsulated, or need to use
-some external templating engine, Improse has you covered:
-
-    <?php use Improse\Html ?>
-    <ul>
-    <?php foreach ($list as $item) { ?>
-        <?=(new Html('/path/to/my/list/item.php'))(compact('item'))?>
-    <?php } ?>
-    </ul>
-
-A good strategy here is to load the item view in the page view and pass it in a
-variable. This can define all 'global' variables that every instance of the
-snippet needs. Then, when rendering, just pass the instance-specific variables
-in when invoking.
+Using subviews it's also perfectly possible to mix and match templating systems,
+since every view defines its own. This comes in handy when building reusable
+modules: the parent project needn't care about the engine your module uses, so
+there's no need to supply various templates in different formats for consumers.
 
