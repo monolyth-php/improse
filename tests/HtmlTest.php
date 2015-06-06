@@ -3,7 +3,6 @@
 set_include_path(dirname(__FILE__).PATH_SEPARATOR.get_include_path());
 require_once dirname(__FILE__).'/Test/View2.php';
 require_once dirname(__FILE__).'/Test/View3.php';
-require_once dirname(__FILE__).'/Test/Template/View.php';
 require_once dirname(__FILE__).'/Test/Template/NamedView.php';
 require_once dirname(__FILE__).'/Test/TemplateView.php';
 
@@ -13,15 +12,15 @@ class HtmlTest extends PHPUnit_Framework_TestCase
     {
         $view = new Test\View2;
         $out = "$view";
-        $this->assertEquals("<h1>Hello world!</h1>\n", $out);
+        $this->expectOutputString("<h1>Hello world!</h1>\n");
     }
 
     public function testViewTemplate()
     {
         $view = new Test\View2;
-        $template = new Test\TemplateView(['helloWorld' => $view]);
-        $out = "$template";
-        $this->assertEquals(<<<EOT
+        $template = new Test\TemplateView;
+        $out = $template(['helloWorld' => $view]);
+        $this->expectOutputString(<<<EOT
 <div>
     <h1>Hello world!</h1>
 </div>
@@ -36,33 +35,7 @@ EOT
     {
         $view = new Test\View3;
         $out = "$view";
-        $this->assertEquals("<h1>Hello Mars!</h1>\n", $out);
-    }
-
-    public function testViewDataPersists()
-    {
-        $view = new Test\View2(['test' => 'this is injected']);
-        $template = new Test\TemplateView(['helloWorld' => "$view"]);
-        $out = "$template";
-        $this->assertEquals(<<<EOT
-<div>this is injected
-    <h1>Hello world!</h1>
-</div>
-
-EOT
-            ,
-            $out
-        );
-    }
-
-    public function testDefaultTemplate()
-    {
-        $view = new Test\Template\View;
-        $out = "$view";
-        $this->assertEquals('default view', trim($out));
-        $view = new Test\Template\NamedView;
-        $out = "$view";
-        $this->assertEquals('named view', trim($out));
+        $this->expectOutputString("<h1>Hello Mars!</h1>\n", $out);
     }
 }
 
