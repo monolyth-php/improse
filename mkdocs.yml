@@ -1,3 +1,11 @@
 site_name: Improse
 
-theme: readthedocs
+pages:
+- Home:
+    - 'Quickstart': 'index.md'
+- Basic usage:
+    - 'Installation': 'basic/installation.md'
+    - 'Views': 'basic/views.md'
+    - 'Templates': 'basic/templates.md'
+
+theme: united
