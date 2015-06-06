@@ -5,6 +5,7 @@ namespace Improse;
 class Html extends View
 {
     protected $template;
+    protected $viewdata;
 
     public function __invoke(array $viewdata = [])
     {
@@ -23,15 +24,11 @@ class Html extends View
             $parts[] = $last;
             $this->template = implode('/', $parts).'.php';
         }
-        $this->viewdata = $viewdata + $this->viewdata + self::$globalViewdata;
+        $this->viewdata = $viewdata;
         return call_user_func(function () {
             extract($this->viewdata);
-            ob_start();
-            $return = require $this->template;
-            if ($return && is_array($return)) {
-                self::$globalViewdata = $return + self::$globalViewdata;
-            }
-            return ob_get_clean();
+            require $this->template;
+            return '';
         });
     }
 }

@@ -8,12 +8,12 @@ class JsonTest extends PHPUnit_Framework_TestCase
 {
     public function testViewWithJson()
     {
-        $view = new Json([
+        $view = new Json;
+        $out = $view([
             'foo' => 'bar',
             'baz' => [1, 2],
             'barf' => ['fizz', 'bizz'],
         ]);
-        $out = "$view";
         $this->assertEquals(
             '{"foo":"bar","baz":[1,2],"barf":["fizz","bizz"]}',
             $out
