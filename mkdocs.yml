@@ -1,4 +1,6 @@
 site_name: Improse
+site_url: http://improse.monomelodies.nl/docs/
+repo_url: https://github.com/monomelodies/improse
 
 pages:
 - Home:
