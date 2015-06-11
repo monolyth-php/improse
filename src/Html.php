@@ -26,6 +26,7 @@ class Html extends View
         }
         $this->viewdata = $viewdata;
         return call_user_func(function () {
+            @header("Content-type: text/html", true, 200);
             extract($this->viewdata);
             require $this->template;
             return '';
