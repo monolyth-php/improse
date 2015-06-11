@@ -8,4 +8,3 @@ pages:
     - 'Views': 'basic/views.md'
     - 'Templates': 'basic/templates.md'
 
-theme: united
