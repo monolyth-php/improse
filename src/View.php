@@ -23,7 +23,8 @@ class View
     /**
      * @var Closure
      * Closure handling the actual rendering. Defaults to including the
-     */template.
+     * template.
+     */
     public static $engine;
 
     /**
