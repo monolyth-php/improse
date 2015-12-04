@@ -48,7 +48,7 @@ class ViewTest extends PHPUnit_Framework_TestCase
         $view::$engine = function (array $variables) {
             throw new \ErrorException('testing');
         };
-        $view::$swallowErrors = 'This is an error';
+        $view::$swallowError = 'This is an error';
         $view->bar = 'foo';
         $this->assertEquals('This is an error', trim($view));
         $this->assertTrue(View::whoops());
