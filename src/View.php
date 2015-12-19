@@ -141,6 +141,13 @@ class View
         $values = [];
         foreach ($this as $prop => $value) {
             if (!in_array($prop, $ignore)) {
+                if (is_object($value)) {
+                    if (method_exists($value, 'jsonSerialize')) {
+                        $value = $value->jsonSerialize();
+                    } elseif (method_exists($value, 'getArrayCopy')) {
+                        $value = $value->getArrayCopy();
+                    }
+                }
                 $values[$prop] = $value;
             }
         }
