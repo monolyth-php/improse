@@ -4,16 +4,18 @@ PHP5 View and templating front for MVC projects
 Surprisingly, most MVC frameworks out there get Controllers and Views utterly
 wrong. If you've ever worked with one, you'll recognize the following pattern:
 
-    <?php
+```php
+<?php
 
-    class SomeController extends BaseController
+class SomeController extends BaseController
+{
+    public function actionIndex()
     {
-        public function actionIndex()
-        {
-            $this->data = new SomeModel;
-            $this->render('path/to/template.php', ['data' => $this->data]);
-        }
+        $this->data = new SomeModel;
+        $this->render('path/to/template.php', ['data' => $this->data]);
     }
+}
+```
 
 This is wrong for a number of reasons, all stemming from formal MVC theory:
 
@@ -22,178 +24,266 @@ This is wrong for a number of reasons, all stemming from formal MVC theory:
    instantiating a model and passing it on to the template/view.
 2. The template is acting as the View, which is wrong (they're separate
    concepts).
-3. There is now tight coupling between SomeController::indexAction and
-   SomeModel, which would only be relevant if the action changes something
+3. There is now tight coupling between `SomeController::indexAction` and
+   `SomeModel`, which would only be relevant if the action changes something
    (normally, a `POST` handler).
 
 Improse is a simple view layer correcting these errors.
 
-* [Homepage](http://monomelodies.github.io/improse/)
-* [Full documentation](http://improse.readthedocs.org/en/latest/)
+* [Homepage](http://improse.monomelodies.nl/)
+* [Full documentation](http://improse.monomelodies.nl/docs/)
 
 ## Installation
-[See the corresponding section in the documentation.](basic/installation.md)
+
+### Composer (recommended)
+```bash
+$ cd /path/to/project
+$ composer require monomelodies/improse
+```
+
+### Manual
+1. Download or clone the repository;
+2. Add `/path/to/improse/src` in your PSR-4 autoloader for the namespace
+   `Improse`.
 
 ## Basic usage
-[For more detailed explanation and examples, see the documentation.](basic/views.md)
+```php
+<?php
 
-An Improse view is simply an invokable class. The base class also provides a
-`__toString` method that invokes-till-it-can-invoke-no-more:
+use Improse\View;
+$view = new View('/path/to/template/file');
+echo $view->render();
+```
+
+The base view defines a `render` method which renders the requested file. So
+you can also pass the rendered view to some other handler (e.g. an emitter):
 
 ```php
 <?php
 
-use Improse;
+return emit($view->render());
+```
 
-class View extends Improse\View
+Views also have a `__toString` method which simply returns the result of
+`render`, so the following two are actually equivalent:
+
+```php
+<?php
+
+echo $view->render();
+echo $view;
+```
+
+> The main difference is that since `__toString` cannot throw exceptions in PHP,
+> it catches them and uses `filp\whoops` to display them instead. `render` on
+> the other hand would just `throw` it.
+
+## Defining view data
+All _public_ members of the view are considered "view data" by the `render`
+method:
+
+```php
+<?php
+
+$view->foo = 'bar';
+echo $view; // The template now has $foo with value "bar"
+```
+
+In the real world, your views will need to collect data to render. Hence you'll
+mostly use the `View` class as a base to extend off of:
+
+```php
+<?php
+
+class MyView extends Improse\View
 {
-    public function __invoke()
+    // Either define the template on the class...
+    protected $template = '/path/to/template';
+
+    public function __construct(PDO $db)
     {
-        return '<h1>Hello world!</h1>';
+        // ...or pass it to the parent constructor.
+        parent::__construct('/path/to/template');
+        $stmt = $db->prepare('SELECT foo FROM bar');
+        $stmt->execute();
+        $this->foo = $stmt->fetch(PDO::FETCH_ASSOC);
     }
 }
 ```
 
-Then, wherever you need it rendered, simply `__toString` it:
+## Making templates useful
+The basic behaviour for Improse views is to `include` the template file. Thus,
+you can pass HTML (or other static formats) to it, _or_ a PHP file:
 
-```html
-<body>
-    <!-- assuming $view is an object of the above View class: -->
-    <?=$view?>
-</body>
+```php
+<?php
+
+$view = new View('/path/to/my/file.php');
+$view->foo = 'bar';
+echo $view;
 ```
 
-## Adding templates
-Echoing tons of HTML in the invoke method is of course impractical. What most
-MVC frameworks erroneously call "the view" is actually a _template_ (usually
-`HTML`, but could be anything a browser groks like `XML` or `Json`, or - for
-completeness sake - some other output alltogether, like an `ODF` document).
+```php
+<html>
+    <body><?=$foo?></body>
+</html>
+```
 
-Improse is _not_ a templating engine. Other projects exist for that, e.g.
+## Nesting views
+Views can also contain other views:
+
+```php
+<?php
+
+$template = new View('/path/to/main/template');
+$view = new View('/path/to/some/page');
+$template->page = $view;
+echo $view;
+```
+
+The template can now simply `echo $page` somewhere.
+
+> Most templating engines (see below) also support this, but it could come in
+> _very_ handy when you're mixing multiple templating systems, e.g. `Twig`,
+> `Blade` and `Moustache` in different sections of your application. Improse is
+> "templating-system-neutral" in that respect.
+
+## Tying templates to views
+In any but the most trivial application, views will contain logic so you'll find
+yourself extending the base view for custom per-page or per-section views:
+
+```php
+<?php
+
+class MyView extends Improse\View
+{
+    // Define the template on the class...
+    protected $template = '/path/to/template';
+
+    public function __construct($template = null)
+    {
+        parent::__construct($template);
+        // [...snip all logic for MyView...]
+    }
+}
+```
+
+Note that you can still override the template to use on a per-case basis since
+we're calling the parent `__construct`or with an argument:
+
+```php
+<?php
+
+$view = new MyView('/some/custom/template');
+```
+
+## Just-in-time logic
+You can also choose to place all your logic in an overridden `render` method.
+Just forward to `parent::render()` and return its result when you're done:
+
+```php
+<?php
+
+class MyView extends Improse\View
+{
+    protected $template = '/path/to/template';
+
+    public function render()
+    {
+        // [...snip all logic for MyView...]
+        return parent::render();
+    }
+}
+```
+
+This strategy allows you to define all views up front, but only make them do
+heavy lifting (e.g. retrieving data from a RMDBS) when they actually get
+rendered (based on your application's logic).
+
+## Templating engines
+Even though PHP is itself a templating engine, many people (including us...)
+prefer to use a separate templating engine, e.g.
 [Twig](http://twig.sensiolabs.org) or [Smarty](http://www.smarty.net/).
-[See the example on template integration in the docs.](basic/templates.md)
 
-If you're comfortable with using PHP-as-a-templating-engine, Improse offers an
-extermely basic `Html` view. This simply `include`s the template as defined on
-the procted property `$template` in your view, exposing local variables as
-passed to the `__invoke` method:
-
-```php
-<?php
-
-use Improse\Html;
-
-class View extends Html
-{
-    protected $template = '/path/to/template.php';
-
-    public function __invoke()
-    {
-        return parent::__invoke(['place' => 'world']);
-    }
-```
-
-```html
-<h1>Hello <?=$place?>!</h1>
-```
-
-## Handling data
-Nest views extending the data array passed to each `__invoke` parent call if
-you need to "build on top" of a view. Keep it DRY!
-
-An example where this could be useful is e.g. a blog where reading a post is a
-dedicated page with a view, but showing comments is that same view, only with
-an opened comment secion. The view `PostWithCommentsView` could then extend the
-`PostView` and just add the comments.
-
-> Of course this trivial problem could also be solved by passing a parameter
-> to the View's constructor, e.g. `$showComments = false`, but you get the idea.
-> In complex setups, extend views is super-duper handy.
-
-## Simplifying things
-Obviously, views not requiring any additional data seem rather superfluous.
-In fact, that's exactly the idea! If your page is _that_ static, you shouldn't
-need a View (or a Controller for that matter at all (well, except for headers
-maybe, but a front controller can set those too).
-
-We'd recommend sticking to the following workflow:
-
-- The _front controller_ parsers the request and decides which piece of logic
-  needs to kick in;
-- For _static pages_, just output a template;
-- For _read-only page with data_, setup the corresponding view and render it
-  (or usually its template);
-- For _dynamic pages handling user interaction_, first setup the corresponding
-  controller and let it do its stuff. Next, setup the corresonding view and
-  render it (or usually its template) depending on controller success.
-
-## Snippets
-"Snippets" are subtemplates that appear in recurring places (e.g. a sidebar
-with "recent posts" on a blog that's shown on every page). Ideally, such a
-snippet would use its own view taking care of its own data.
-
-Improse views are designed to be "`__toString`able", so this is easy:
+Integrating a templating engine is a matter of _overriding_ the static `engine`
+property in your extending class, and let it use its own logic. `engine` is
+simply a [Closure](http://php.net/manual/en/class.closure.php) that receives a
+hash of key/value pairs of view data, and is bound to the current view class. An
+example using Twig could look like this:
 
 ```php
 <?php
 
-use Improse\View;
-
-class MyblogpageView extends View
+class TwigView extends Improse\View
 {
-    public function __construct()
-    {
-        parent::__construct();
-        // ...other stuff needed...
-
-        $this->recents = new RecentpostView;
-    }
-
-    // Example invocation:
-    public function __invoke()
-    {
-        echo '<h1>my blog page!</h1>';
-        // Sidebar:
-        echo '<aside>';
-        echo $this->recents;
-        echo '</aside>';
+    // ...[snip custom logic]...
 }
+
+TwigView::$engine = function (array $variables) {
+    $loader = new Twig_Loader_Filesystem('/path/to/templates');
+    $twig = new Twig_Environment($loader, [
+        'cache' => '/path/to/cache/dir',
+        'auto_reload' => true, // or false
+        'debug' => true, // or false
+    ]);
+    return $this->twig->render($this->template, $variables);
+};
 ```
-...and the RecentpostView:
-```
+
+> The `$engine` closure is a _static member_ of your views. So all views
+> extending the `TwigView` in this example will use the Twig engine, but views
+> directly extending `Improse\View` will use the default engine.
+
+If you require some other callable to render the view, simply wrap it in an
+actual closure:
+
+```php
 <?php
 
-use Improse\View;
+MyView::$engine = function (array $variables) use ($myOtherCallable) {
+    return call_user_func($myOtherCallable, $variables);
+};
+```
 
-class RecentpostView extends View
-{
-    public function __construct()
-    {
-        // ...
-        // Wherever you get them from:
-        $this->posts = getRecentPosts();
-    }
+> Note that when forwarding like this, `$myOtherCallable` _won't_ have access to
+> the calling view as `$this`, so if you need that access (e.g. to get to the
+> current `$template`), you'll need to make sure your proxied callable expects
+> that as an extra parameter, e.g. `call_user_func($callable, $this->template,
+> $variables)`.
 
-    public function __invoke()
-    {
-        echo '<ul>';
-        foreach ($this->posts as $post) {
-            echo '<li>'.$post['title'].'</li>';
-        }
-        echo '</ul>';
+## Handling errors
+Improse uses `filp\whoops` to pretty-print errors caused by exceptions in its
+`__toString` calls (since they cannot throw exceptions in PHP).
+
+Since a "whoops" may be triggered in any sub-view, if you're really bothered
+about your error HTML being valid (since it might contain duplicate `<head>`
+tags for instance if they were already outputted), you should handle this in
+your application logic (e.g. using output buffering). Improse views offer a
+static `whoops` method which returns `true` if any error occured:
+
+```php
+<?php
+
+if (Improse\View::whoops()) {
+    // error...
+} else {
+    // ok, display page
 }
 ```
-When using templates, simply rely on the `__toString` method being called and
-let the subview load its own template. E.g., using Twig:
-```html
-<h1>my blog page!</h1>
-<aside>
-    {{ recents }}
-</aside>
-```
 
-Using subviews it's also perfectly possible to mix and match templating systems,
-since every view defines its own. This comes in handy when building reusable
-modules: the parent project needn't care about the engine your module uses, so
-there's no need to supply various templates in different formats for consumers.
+Of course, since you'll want to fix the error anyway you might as well dump it
+to screen anyway. But you could also be a bit more friendly depending on whether
+your app is in development or in production mode. Views also have a static
+`$swallowErrors` property. It defaults to false, but set it to any non-false
+value and a view with an error will render that instead (so ideally you'd put it
+to a string message like `"Error! We're flogging the programmer!"`).
+
+## This is all so basic...
+So you've read the above and looked at the Improse source code (which admittedly
+is extremely small). Maybe you find yourself wondering why you'd use Improse _at
+all_; it's only a few lines of code, after all.
+
+But, it saves you some boilerplate code, and by extending the base view the
+template, variable en rendering logic are already in place. It also forces you
+to implement views in the _correct_ MVC way :)
 
