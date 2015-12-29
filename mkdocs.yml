@@ -5,8 +5,4 @@ repo_url: https://github.com/monomelodies/improse
 pages:
 - Home:
     - 'Quickstart': 'index.md'
-- Basic usage:
-    - 'Installation': 'basic/installation.md'
-    - 'Views': 'basic/views.md'
-    - 'Templates': 'basic/templates.md'
 
