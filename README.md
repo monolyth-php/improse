@@ -205,11 +205,9 @@ Even though PHP is itself a templating engine, many people (including us...)
 prefer to use a separate templating engine, e.g.
 [Twig](http://twig.sensiolabs.org) or [Smarty](http://www.smarty.net/).
 
-Integrating a templating engine is a matter of _overriding_ the static `engine`
-property in your extending class, and let it use its own logic. `engine` is
-simply a [Closure](http://php.net/manual/en/class.closure.php) that receives a
-hash of key/value pairs of view data, and is bound to the current view class. An
-example using Twig could look like this:
+Integrating a templating engine is a matter of _overriding_ the `render` method
+in an extending class, and let it use its own logic. An example using Twig could
+look like this:
 
 ```php
 <?php
@@ -217,39 +215,23 @@ example using Twig could look like this:
 class TwigView extends Improse\View
 {
     // ...[snip custom logic]...
+
+    public function render()
+    {
+        $loader = new Twig_Loader_Filesystem('/path/to/templates');
+        $twig = new Twig_Environment($loader, [
+            'cache' => '/path/to/cache/dir',
+            'auto_reload' => true, // or false
+            'debug' => true, // or false
+        ]);
+        return $this->twig->render($this->template, $this->getVariables());
+    }
 }
-
-TwigView::$engine = function (array $variables) {
-    $loader = new Twig_Loader_Filesystem('/path/to/templates');
-    $twig = new Twig_Environment($loader, [
-        'cache' => '/path/to/cache/dir',
-        'auto_reload' => true, // or false
-        'debug' => true, // or false
-    ]);
-    return $this->twig->render($this->template, $variables);
-};
 ```
 
-> The `$engine` closure is a _static member_ of your views. So all views
-> extending the `TwigView` in this example will use the Twig engine, but views
-> directly extending `Improse\View` will use the default engine.
-
-If you require some other callable to render the view, simply wrap it in an
-actual closure:
-
-```php
-<?php
-
-MyView::$engine = function (array $variables) use ($myOtherCallable) {
-    return call_user_func($myOtherCallable, $variables);
-};
-```
-
-> Note that when forwarding like this, `$myOtherCallable` _won't_ have access to
-> the calling view as `$this`, so if you need that access (e.g. to get to the
-> current `$template`), you'll need to make sure your proxied callable expects
-> that as an extra parameter, e.g. `call_user_func($callable, $this->template,
-> $variables)`.
+> The default `render` implementation does nothing else, so your override only
+> needs to handle the actual outputting (though of course you could let it do
+> more, like logging or such).
 
 ## Handling errors
 Improse uses `filp\whoops` to pretty-print errors caused by exceptions in its
