@@ -21,13 +21,6 @@ class View
     protected $template;
 
     /**
-     * @var Closure
-     * Closure handling the actual rendering. Defaults to including the
-     * template.
-     */
-    public static $engine;
-
-    /**
      * @var false|string
      * If false (the default) shows a Whoops error page on error. If set to a
      * string, displays that message instead. Extending views may define custom
@@ -59,15 +52,6 @@ class View
             throw new DomainException(
                 "Every view must define its \$template file."
             );
-        }
-        if (!isset(static::$engine)) {
-            static::$engine = function (array $__variables) {
-                extract($__variables);
-                unset($__variables);
-                ob_start();
-                require $this->template;
-                return ob_get_clean();
-            };
         }
     }
 
@@ -110,16 +94,11 @@ class View
      */
     public function render()
     {
-        if (!(static::$engine instanceof Closure)) {
-            throw new DomainException(
-                "\$engine must be an instance of Closure. "
-               ."Wrap it in a lambda if you need some other callable instead."
-            );
-        }
-        return call_user_func(
-            static::$engine->bindTo($this, $this),
-            $this->getVariables()
-        );
+        extract($this->getVariables());
+        unset($__variables);
+        ob_start();
+        require $this->template;
+        return ob_get_clean();
     }
 
     /**
