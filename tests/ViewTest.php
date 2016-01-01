@@ -21,22 +21,9 @@ class ViewTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('<h1>bar</h1>', trim($view));
     }
 
-    public function testOverriddenEngine()
-    {
-        $view = new View(__DIR__.'/_files/php.php');
-        $view->foo = 'bar';
-        $view::$engine = function (array $variables) {
-            return strtoupper($this->foo);
-        };
-        $this->assertEquals('BAR', trim($view));
-    }
-
     public function testExceptionTriggersWhoops()
     {
-        $view = new View(__DIR__.'/_files/php.php');
-        $view::$engine = function (array $variables) {
-            throw new \ErrorException('testing');
-        };
+        $view = new View(__DIR__.'/_files/exception.php');
         $view->bar = 'foo';
         $this->assertTrue(strpos(trim($view), '<div class="Whoops container">') !== false);
         $this->assertTrue(View::whoops());
@@ -44,10 +31,7 @@ class ViewTest extends PHPUnit_Framework_TestCase
 
     public function testSwallowErrors()
     {
-        $view = new View(__DIR__.'/_files/php.php');
-        $view::$engine = function (array $variables) {
-            throw new \ErrorException('testing');
-        };
+        $view = new View(__DIR__.'/_files/exception.php');
         $view::$swallowError = 'This is an error';
         $view->bar = 'foo';
         $this->assertEquals('This is an error', trim($view));
