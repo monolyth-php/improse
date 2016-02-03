@@ -121,7 +121,9 @@ class View
         foreach ($this as $prop => $value) {
             if (!in_array($prop, $ignore)) {
                 if (is_object($value)) {
-                    if (method_exists($value, 'jsonSerialize')) {
+                    if (method_exists($value, '__toString')) {
+                        $value = $value->__toString();
+                    } elseif (method_exists($value, 'getArrayCopy')) {
                         $value = $value->jsonSerialize();
                     } elseif (method_exists($value, 'getArrayCopy')) {
                         $value = $value->getArrayCopy();
