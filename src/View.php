@@ -123,7 +123,7 @@ class View
                 if (is_object($value)) {
                     if (method_exists($value, '__toString')) {
                         $value = $value->__toString();
-                    } elseif (method_exists($value, 'getArrayCopy')) {
+                    } elseif (method_exists($value, 'jsonSerialize')) {
                         $value = $value->jsonSerialize();
                     } elseif (method_exists($value, 'getArrayCopy')) {
                         $value = $value->getArrayCopy();
