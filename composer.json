@@ -13,8 +13,7 @@
         "filp/whoops": "^1.1"
     },
     "require-dev": {
-        "monomelodies/gentry": "^0.6",
-        "phpunit/phpunit": "4.0.*"
+        "monomelodies/gentry": "^0.6"
     },
     "autoload": {
         "psr-4": {
