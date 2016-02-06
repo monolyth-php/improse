@@ -29,7 +29,7 @@ class View
     public static $swallowError = false;
     
     /**
-     * @var boolean
+     * @var bool
      * True if any view triggered an error. Accessible via static `whoops`
      * method. Use to decide e.g. if you want to terminate your script.
      */
@@ -42,6 +42,8 @@ class View
      * @param string $template Resolvable path to template file. Default
      *  resolve is simply `include`, other template engines might let you
      *  define a base path (e.g. Twig).
+     * @throws DomainException if a template wasn't defined either as a property
+     *  or during construction.
      */
     public function __construct($template = null)
     {
@@ -91,6 +93,7 @@ class View
      * allow errors to be thrown instead of letting Whoops handle them.
      *
      * @return string A string of HTML, e.g. to be `echo`'d.
+     * @throws mixed Whatever error rendering the template might trigger.
      */
     public function render()
     {
