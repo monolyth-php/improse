@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "78ebbd4badac4fba25608ed48798db98",
-    "content-hash": "846d97a1f08f013a985f2f1a9684322f",
+    "hash": "40dc15544ee37fda22c2f4afc3201013",
+    "content-hash": "f9a558db041e2710b3bafcbd45fdbdf9",
     "packages": [
         {
             "name": "filp/whoops",
@@ -68,31 +68,32 @@
     ],
     "packages-dev": [
         {
-            "name": "monomelodies/gentry",
-            "version": "0.6.2",
+            "name": "gentry/gentry",
+            "version": "0.10.2",
             "source": {
                 "type": "git",
-                "url": "https://github.com/monomelodies/gentry.git",
-                "reference": "e22f053ee5bca3451d7bcdad368dbf4cedbac3e3"
+                "url": "https://github.com/gentry-php/gentry.git",
+                "reference": "096849915d0e7957f61470829df6961709afc2d3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/monomelodies/gentry/zipball/e22f053ee5bca3451d7bcdad368dbf4cedbac3e3",
-                "reference": "e22f053ee5bca3451d7bcdad368dbf4cedbac3e3",
+                "url": "https://api.github.com/repos/gentry-php/gentry/zipball/096849915d0e7957f61470829df6961709afc2d3",
+                "reference": "096849915d0e7957f61470829df6961709afc2d3",
                 "shasum": ""
             },
             "require": {
-                "monomelodies/kingconf": "^1.0",
+                "monomelodies/kingconf": "^1.1.0",
+                "php": ">=7",
                 "simoneast/simple-ansi-colors": "^1.0",
                 "zeptech/annotations": "^1.0.0"
             },
             "bin": [
-                "gentry"
+                "bin/gentry"
             ],
             "type": "library",
             "autoload": {
                 "psr-4": {
-                    "Gentry\\": "src"
+                    "Gentry\\Gentry\\": "src"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -106,20 +107,20 @@
                 }
             ],
             "description": "PHP unit test generation tools",
-            "time": "2016-02-04 09:22:57"
+            "time": "2016-07-15 06:45:41"
         },
         {
             "name": "monomelodies/kingconf",
-            "version": "1.0.3",
+            "version": "1.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/monomelodies/kingconf.git",
-                "reference": "f3e0657f626d8fdd8b2c66d5e79cf75c4ae88405"
+                "reference": "350bf4e1f8163b5843f9dec82bd6230968166015"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/monomelodies/kingconf/zipball/f3e0657f626d8fdd8b2c66d5e79cf75c4ae88405",
-                "reference": "f3e0657f626d8fdd8b2c66d5e79cf75c4ae88405",
+                "url": "https://api.github.com/repos/monomelodies/kingconf/zipball/350bf4e1f8163b5843f9dec82bd6230968166015",
+                "reference": "350bf4e1f8163b5843f9dec82bd6230968166015",
                 "shasum": ""
             },
             "require": {
@@ -132,7 +133,7 @@
             "type": "library",
             "autoload": {
                 "psr-4": {
-                    "Kingconf\\": "src/"
+                    "Monomelodies\\Kingconf\\": "src/"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -156,7 +157,7 @@
                 "xml",
                 "yaml"
             ],
-            "time": "2015-12-02 06:41:03"
+            "time": "2016-07-15 06:21:55"
         },
         {
             "name": "simoneast/simple-ansi-colors",
@@ -206,16 +207,16 @@
         },
         {
             "name": "symfony/yaml",
-            "version": "v3.0.2",
+            "version": "v3.1.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/yaml.git",
-                "reference": "3cf0709d7fe936e97bee9e954382e449003f1d9a"
+                "reference": "2884c26ce4c1d61aebf423a8b912950fe7c764de"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/yaml/zipball/3cf0709d7fe936e97bee9e954382e449003f1d9a",
-                "reference": "3cf0709d7fe936e97bee9e954382e449003f1d9a",
+                "url": "https://api.github.com/repos/symfony/yaml/zipball/2884c26ce4c1d61aebf423a8b912950fe7c764de",
+                "reference": "2884c26ce4c1d61aebf423a8b912950fe7c764de",
                 "shasum": ""
             },
             "require": {
@@ -224,7 +225,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "3.0-dev"
+                    "dev-master": "3.1-dev"
                 }
             },
             "autoload": {
@@ -251,7 +252,7 @@
             ],
             "description": "Symfony Yaml Component",
             "homepage": "https://symfony.com",
-            "time": "2016-02-02 13:44:19"
+            "time": "2016-06-29 05:41:56"
         },
         {
             "name": "zeptech/annotations",
