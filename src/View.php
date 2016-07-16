@@ -1,6 +1,6 @@
 <?php
 
-namespace Improse;
+namespace Monolyth\Improse;
 
 use DomainException;
 use ReflectionClass;
