@@ -1,5 +1,5 @@
 {
-    "name": "monomelodies/improse",
+    "name": "monolyth/improse",
     "description": "PHP5 View and templating system for MVC projects",
     "license": "MIT",
     "keywords": ["php","view","template","mvc"],
@@ -13,17 +13,17 @@
         "filp/whoops": "^1.1"
     },
     "require-dev": {
-        "monomelodies/gentry": "^0.6"
+        "gentry/gentry": "^0.6"
     },
     "autoload": {
         "psr-4": {
-            "Improse\\": "src"
+            "Monolyth\\Improse\\": "src"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Improse\\": "src",
-            "Improse\\Test\\": "tests"
+            "Monolyth\\Improse\\": "src",
+            "Monolyth\\Improse\\Test\\": "tests"
         }
     }
 }
