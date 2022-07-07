@@ -49,11 +49,6 @@ class View
         if (isset($template)) {
             $this->template = $template;
         }
-        if (!isset($this->template)) {
-            throw new DomainException(
-                "Every view must define its \$template file."
-            );
-        }
         if (!isset(self::$errorHandler)) {
             self::setErrorHandler(function (Throwable $e) : string {
                 return 'Oopsie, we did a boo-boo :-(';
@@ -91,7 +86,9 @@ class View
         extract($this->getVariables());
         unset($__variables);
         ob_start();
-        require $this->template;
+        if (isset($this->template)) {
+            require $this->template;
+        }
         return ob_get_clean();
     }
 
