@@ -3,7 +3,7 @@
 namespace Monolyth\Improse;
 
 use DomainException;
-use ReflectionClass;
+use ReflectionObject;
 use ReflectionProperty;
 use Exception;
 use Closure;
@@ -112,25 +112,11 @@ class View
      */
     protected function getVariables() : array
     {
-        $reflection = new ReflectionClass($this);
-        foreach ($reflection->getProperties(
-            ReflectionProperty::IS_PROTECTED |
-            ReflectionProperty::IS_PRIVATE |
-            ReflectionProperty::IS_STATIC
-        ) as $property) {
-            $ignore[] = $property->name;
-        }
+        $reflection = new ReflectionObject($this);
         $values = [];
-        foreach ($this as $prop => $value) {
-            if (!in_array($prop, $ignore)) {
-                if (is_object($value)) {
-                    if (method_exists($value, 'jsonSerialize')) {
-                        $value = $value->jsonSerialize();
-                    } elseif (method_exists($value, 'getArrayCopy')) {
-                        $value = $value->getArrayCopy();
-                    }
-                }
-                $values[$prop] = $value;
+        foreach ($reflection->getProperties(ReflectionProperty::IS_PUBLIC & ~ReflectionProperty::IS_STATIC) as $property) {
+            if (isset($this->{$property->getName()})) {
+                $values[$property->getName()] = $this->{$property->getName()};
             }
         }
         return $values;
