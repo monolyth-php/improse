@@ -7,6 +7,7 @@ use ReflectionObject;
 use ReflectionProperty;
 use Exception;
 use Closure;
+use Throwable;
 
 class View
 {
