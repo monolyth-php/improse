@@ -45,7 +45,7 @@ class View
      * @throws DomainException if a template wasn't defined either as a property
      *  or during construction.
      */
-    public function __construct(string $template = null)
+    public function __construct(?string $template = null)
     {
         if (isset($template)) {
             $this->template = $template;
