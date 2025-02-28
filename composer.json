@@ -9,8 +9,8 @@
             "email": "marijn@monomelodies.nl"
         }
     ],
-    "require": {
-        "filp/whoops": "^1.1"
+    "suggest": {
+        "filp/whoops": "PHP errors for cool kids"
     },
     "require-dev": {
         "gentry/gentry": "^0.16.0",
